@@ -1,18 +1,22 @@
-import ReactDOM from 'react-dom/client'
-import App from './App.jsx'
+import ReactDOM from 'react-dom/client';
 
-// This line of code is used in React to render a React component (<App />) 
-// into a specific HTML element in the DOM
-ReactDOM.createRoot(document.getElementById('root')).render(<App />)
-// ReactDOM: This is the React DOM package, which is used to interact with the DOM (Document Object Model) and render React components.
+import App from './App';
 
-// createRoot: This is a method provided by ReactDOM to create a root for your React application.
+ReactDOM.createRoot(document.querySelector('#root')).render(<App />)
 
-//In React, createRoot is used to set up a "root" for your React application. Here's a clearer explanation of what a "root" is in this context:
-// The "root" is essentially a container in the DOM where your entire React application will be mounted. It acts as the starting point for rendering all your React components.
 
-// .render: This method is called on the root object created by createRoot. It is used to render the specified React component into the selected DOM element.
 
-/* <App />: This is a React component that you want to render. It represents 
-the root component of your React application. In this context, <App /> is a JSX 
-(JavaScript XML)tag that corresponds to the App component defined elsewhere in your code. */
+{/* <Content ex1Name={part1} ex1Num={exercises1}
+				ex2Name={part2} ex2Num={exercises2}
+				ex3Name = {part3} ex3Num = {exercises3} /> */}
+
+
+{/* <p>
+				{ex1Name} {ex1Num}
+			</p>
+			<p>
+				{ex2Name} {ex2Num}
+			</p>
+			<p>
+				{ ex3Name } { ex3Num }
+			</p> */}
