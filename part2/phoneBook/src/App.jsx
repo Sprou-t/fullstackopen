@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
-import phonebookService from './services/phonebook'
+import phonebookService from "./services/phonebook";
 
 // PhoneForm Component
 const PhoneForm = ({
@@ -45,7 +45,8 @@ const Number = ({ names, filterName, handleDeleteNum }) => {
 			<>
 				{(filteredItem.length > 0 ? filteredItem : names).map((item) => (
 					<div key={item.name}>
-						{item.name} {item.number} <button onClick={() => handleDeleteNum(item.id)}>Delete</button>
+						{item.name} {item.number}{" "}
+						<button onClick={() => handleDeleteNum(item.id)}>Delete</button>
 					</div>
 				))}
 			</>
@@ -53,14 +54,33 @@ const Number = ({ names, filterName, handleDeleteNum }) => {
 	}
 };
 
+const Notification = ({ message }) => {
+	const notificationStyle = {
+		backgroundColor: 'grey',
+		fontSize: '1.2rem',
+		color: 'green',
+		border: '2px solid green',
+		height: '1.5rem'
+	}
+	return (
+		<>
+			<div style={notificationStyle}>
+				{message}
+			</div>
+		</>
+	)
+};
+
 const App = () => {
-	const [persons, setPersons] = useState('');
+	const [persons, setPersons] = useState("");
 	const [newName, setNewName] = useState("");
 	const [newNum, setNewNum] = useState("");
 	const [newFilter, setNewFilter] = useState("");
+	const [notificationMessage, setNewNotification] = useState("");
 
 	const addPhoneName = (event) => {
 		event.preventDefault();
+		// find if person being added is already in the book
 		const existingPerson = persons.find(
 			(person) => person.name.toLowerCase() === newName.toLowerCase()
 		);
@@ -86,6 +106,10 @@ const App = () => {
 								person.id === existingPerson.id ? updatedPerson : person
 							)
 						);
+						setNewNotification(`${phoneObj.name}'s number updated`);
+						setTimeout(() => {
+							setNewNotification(null);
+						},5000);
 						setNewName("");
 						setNewNum("");
 					});
@@ -94,19 +118,23 @@ const App = () => {
 			// If the person doesn't exist, create a new entry
 			phonebookService.create(phoneObj).then((newPerson) => {
 				setPersons(persons.concat(newPerson));
+				setNewNotification(`${phoneObj.name}'s number added`);
+				setTimeout(() => {
+					setNewNotification(null);
+				}, 5000);
 				setNewName("");
 				setNewNum("");
 			});
 		}
 	};
 
-// this line is to connect and sync w external db
+	// this line is to connect and sync w external db
 	useEffect(() => {
 		// 2nd then is used to handle extracted data from getAll taken from DB
-		phonebookService.getAll().then(eachNum => {
-			setPersons(eachNum)
-		})
-	},[])
+		phonebookService.getAll().then((eachNum) => {
+			setPersons(eachNum);
+		});
+	}, []);
 
 	const handleNameChange = (event) => {
 		setNewName(event.target.value);
@@ -122,16 +150,17 @@ const App = () => {
 
 	const handleDeleteNum = (id) => {
 		// use the id to find the item and remove it
-		const person = persons.find(person => person.id === id)
+		const person = persons.find((person) => person.id === id);
 		if (window.confirm(`Delete ${person.name}?`)) {
-			phonebookService.remove(person.id).then(() => setPersons(persons.filter(p => p.id !== id))
-
-			)
+			phonebookService
+				.remove(person.id)
+				.then(() => setPersons(persons.filter((p) => p.id !== id)));
 		}
-	}
+	};
 
 	return (
 		<div>
+			<Notification message={notificationMessage} />
 			<h2>Phonebook</h2>
 			<Filter handleFilterChange={handleFilterChange} />
 
@@ -145,7 +174,11 @@ const App = () => {
 			/>
 
 			<h3>Numbers</h3>
-			<Number names={persons} filterName={newFilter} handleDeleteNum={handleDeleteNum} />
+			<Number
+				names={persons}
+				filterName={newFilter}
+				handleDeleteNum={handleDeleteNum}
+			/>
 		</div>
 	);
 };
