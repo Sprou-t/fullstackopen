@@ -1,5 +1,6 @@
 import axios from "axios";
-const baseUrl = "http://localhost:3001/persons";
+// this baseUrl should match the route handler's url
+const baseUrl = "/api/phonebook";
 
 
 // all these get,post,put,delete method r to interact w db
