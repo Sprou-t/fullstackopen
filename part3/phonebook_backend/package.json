@@ -1,0 +1,36 @@
+{
+	"name": "phonebook",
+	"private": true,
+	"version": "0.0.0",
+	"type": "module",
+	"main": "index.js",
+	"scripts": {
+		"test": "echo \"Error: no test specified\" && exit 1",
+		"start": "node index.js",
+		"dev": "nodemon index.js",
+		"lint": "eslint .",
+		"build:ui": "rm -rf dist && cd ../../part2/phoneBook && npm run build && cp -r dist ../../part3/phonebook_backend/",
+		"deploy": "fly deploy",
+		"deploy:full": "npm run build:ui && npm run deploy",
+		"logs:prod": "fly logs"
+	},
+	"dependencies": {
+		"cors": "^2.8.5",
+		"express": "^4.19.2",
+		"morgan": "^1.10.0",
+		"react": "^18.3.1",
+		"react-dom": "^18.3.1"
+	},
+	"devDependencies": {
+		"@flydotio/dockerfile": "^0.5.8",
+		"@types/react": "^18.3.3",
+		"@types/react-dom": "^18.3.0",
+		"@vitejs/plugin-react": "^4.3.1",
+		"eslint": "^8.57.0",
+		"eslint-plugin-react": "^7.34.3",
+		"eslint-plugin-react-hooks": "^4.6.2",
+		"eslint-plugin-react-refresh": "^0.4.7",
+		"nodemon": "^3.1.4",
+		"vite": "^5.3.4"
+	}
+}
