@@ -4,7 +4,9 @@ import express from "express";
 // When you call express(), it creates an Express application, which is an object that has methods for handling
 //HTTP requests and configuring the web server.
 import morgan from "morgan";
-import cors from 'cors';
+import cors from "cors";
+import phoneNumModel from "./models/phoneNumber.js";
+import { error } from "console";
 
 //This app object is used to define routes, middleware, and other settings for your application.
 const app = express();
@@ -12,8 +14,9 @@ const app = express();
 const PORT = process.env.PORT || 3002;
 
 // this line uses the middleware function(express.json()). this middleware
-// function parses request into data that can be retrieved in request.body
-// Environment variables are dynamic variables in the operating system's environment 
+// function parses json data into a js object (which contains the data itself) that we can 
+// access using request.body 
+// Environment variables are dynamic variables in the operating system's environment
 // w/o changing the code itself
 app.use(express.json());
 
@@ -25,7 +28,7 @@ app.use(
 	morgan(":method :url :status :res[content-length] - :response-time ms")
 );
 
-app.use(cors())
+app.use(cors());
 
 let phonebook = [
 	{
@@ -52,11 +55,19 @@ let phonebook = [
 // app is an object that has methods for handling HTTP requests and configuring the web server
 // request contains all the info in the http request made by client
 // response is an obj that contains functions for how to respond to requests
-app.get("/api/phonebook", (request, response) => {
-	// The response.json() method in Express is used to send a JSON type response to the backend. This method sets
-	// the Content - Type header to application / json and converts the JavaScript object or array
-	// you pass to it into a JSON string before sending it to the client.
-	response.json(phonebook);
+app.get("/api/phonebook", (request, response,next) => {
+	// if asynchronous operation of finding the mongo db datai s successful, response.json  will send the result to client
+	phoneNumModel // use model from phoneNumber.js to find the data
+		.find({})
+		.then((phoneNum) => {
+			// The response.json() method in Express is used to send a JSON type response to the backend. This method sets
+			// the Content - Type header to application / json and converts the JavaScript object or array
+			// you pass to it into a JSON string before sending it to the client.
+			response.json(phoneNum);
+		})
+		.catch((error) => {
+			next(error)
+		});
 });
 
 app.get("/info", (request, response) => {
@@ -71,76 +82,96 @@ app.get("/info", (request, response) => {
 	response.send(message);
 });
 
-app.get("/api/phonebook/:id", (request, response) => {
+app.get("/api/phonebook/:id", (request, response, next) => {
 	// id is taken from the url on top
 	const id = request.params.id;
-	const phoneNum = phonebook.find((num) => num.id === id);
-
-	if (phoneNum) {
-		response.json(phoneNum);
-	} else {
-		response.status(404).end();
-	}
+	phoneNumModel
+		.findById(id)
+		.then((IndNum) => {
+			response.json(IndNum);
+		})
+		.catch((error) => next(error));
 });
 
 // Route to delete a specific phonebook entry by id
-app.delete("/api/phonebook/:id", (request, response) => {
+app.delete("/api/phonebook/:id", (request, response, next) => {
 	const id = request.params.id;
-	const initialLength = phonebook.length;
-
-	// Filter out the phonebook entry with the given id
-	phonebook = phonebook.filter((wantedNum) => wantedNum.id !== id);
-
-	if (phonebook.length < initialLength) {
-		// If the phonebook length has decreased, the deletion was successful
-		response.status(204).end();
-	} else {
-		// If the phonebook length has not changed, the id was not found
-		response.status(404).json({ error: "ID not found" });
-	}
+	phoneNumModel.findByIdAndDelete(id)
+    .then(result => {
+      response.status(204).end()
+    })
+    .catch(error => next(error))
 });
 // postman would send a http req to the URL location with the necessary detail,
-// then the server would process the request and if valid, response.json() 
-// would then send the detail back to the client at the frontend 
+// then the server would process the request and if valid, response.json()
+// would then send the detail back to the client at the frontend
 // to be seen in the webpage(in a json object)
 
 // the detail will be inside request.body that we can use to access its content
-app.post("/api/phonebook", (request, response) => {
-// request.body: Contains the data sent by the client in the body of the POST request.
+app.post("/api/phonebook", (request, response, next) => {
+	// request.body: Contains the data sent by the client in the body of the POST request.
 	const body = request.body;
 
-	if (!body.name || !body.number) {
-		return response.status(400).json({
-			error: "name or number missing",
+	const phoneNum = new phoneNumModel({	
+		name: body.name,
+		number: body.number,
+	});
+
+	// look at db and check for duplication
+	const duplicatedName = phoneNumModel
+		.findOne({ name: body.name })
+		.then((existingEntry) => {
+			if (existingEntry) {
+				const error = new Error("name must be unique");
+				error.name = "ValidationError"; // Set a name for the error
+				return next(error); // Pass the error to the error handler
+			}
 		});
-	}
 
-	const generatedID = Math.floor(Math.random() * 10000).toString();
+	// add the new num to our local array
+	phonebook = phonebook.concat(phoneNum);
+	// this line sends phoneNum (aft converting into json obj) to client(webpage to be seen)
+	phoneNum.save().then((savedNum) => {
+		response.json(savedNum);
+	}).catch(error => next(error));
+});
 
-	const phoneNum = {
-		id: generatedID,
+app.put("/api/phonebook/:id", (request, response, next) => {
+	const body = request.body;
+
+	// note the usage of normal object
+	const phoneNumber = {
 		name: body.name,
 		number: body.number,
 	};
 
-	const duplicatedName = phonebook.find((item) => item.name === body.name);
-
-	if (duplicatedName) {
-		return response.status(400).json({
-			error: "name must be unique",
-		});
-	}
-	// add the new num to our local array
-	phonebook = phonebook.concat(phoneNum);
-	// this line sends phoneNum (aft converting into json obj) to client(webpage to be seen) 
-	response.json(phoneNum);
+	phoneNumModel.findByIdAndUpdate(request.params.id, phoneNumber, { new: true })
+		.then((updatedNum) => {
+			response.json(updatedNum);
+		})
+		.catch((error) => next(error));
 });
 
 const unknownEndpoint = (request, response) => {
 	response.status(404).send({ error: "unknown endpoint" });
 };
 
+const errorHandler = (error, request, response, next) => {
+	console.error(error.message);
+
+	if (error.name === "CastError") {
+		return response.status(400).send({ error: "malformatted id" });
+	} else if (error.name === 'ValidationError') {
+		return response.status(400).json({ error: error.message });
+		// "error": error msg here!
+	}
+
+	next(error);
+};
+
 app.use(unknownEndpoint);
+// this has to be the last loaded middleware, also all the routes should be registered before this!
+app.use(errorHandler);
 
 // these 2 lines allow us to set up the backend server
 app.listen(PORT, () => {
