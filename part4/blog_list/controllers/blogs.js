@@ -59,9 +59,10 @@ blogRouter.delete("/:id", async (request, response, next) => {
 	const decodedToken = jwt.verify(request.token, process.env.SECRET);
 
 	const user = request.user;
-	// delete blog
+	// delete blog from blog collection
 	const deletedBlog = await Blog.findByIdAndDelete(request.params.id);
 
+	// delete blog from user's property array
 	if (deletedBlog) {
 		user.blogs = user.blogs.filter((blogID) => {
 			return blogID.toString() !== deletedBlog.id.toString();

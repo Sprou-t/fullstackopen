@@ -1,9 +1,9 @@
 POST http://localhost:3003/api/blog
 Content-Type: application/json
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImpvaG4iLCJpZCI6IjY2YzIxNDlhZWQ5MWZhNzAxZTliNzQ3NCIsImlhdCI6MTcyMzk5Njg4MX0.WumPx16JamO7LNWZP_XH_Ua7WFrSMPP_Oi0bpw24tUY
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImpvaG4iLCJpZCI6IjY2YzRjODk1ODZhNGIzMzg2N2I2NGQyYSIsImlhdCI6MTcyNDE3MjQ5Nn0.Pte1kIXZ0pMF6X286dIFQoh5hNRB5CJtA2y_FNFj50o
 
 {
-	"title":"blog created to check userExtractor middleware",
+	"title":"second blog created to check userExtractor middleware",
 	"url": "a random url",
 	"likes":13
 }

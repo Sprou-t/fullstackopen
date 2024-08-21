@@ -24,6 +24,7 @@ const tokenExtractor = (request, response, next) => {
 	next(); // Pass control to the next middleware or route handler
 };
 
+// finds out the user and set it to request.user whenever a post or delete request is made
 const userExtractor = async (request, response, next) => {
 	// verify token using jwt. if valid, decode the token to get the user info
 	const decodedToken = jwt.verify(request.token, process.env.SECRET);

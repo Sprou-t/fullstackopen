@@ -33,7 +33,7 @@ app.use(express.json());
 app.use(middleware.requestLogger);
 app.use(middleware.tokenExtractor);
 // app.use(middleware.userExtractor); this makes user creation impossible as even that route undergoes the jwt verification process
-app.use("/api/blogs", middleware.userExtractor, blogRouter); // only blogRouter needs JWT validation
+app.use("/api/blog", middleware.userExtractor, blogRouter); // only blogRouter needs JWT validation
 
 app.use("/api/blog", blogRouter);
 app.use("/api/users", userRouter);
