@@ -1,0 +1,42 @@
+{
+	"name": "backend",
+	"version": "1.0.0",
+	"main": "index.js",
+	"scripts": {
+		"start": "cross-env NODE_ENV=production node index.js",
+		"test": "cross-env NODE_ENV=test node --test",
+		"dev": "cross-env NODE_ENV=development nodemon index.js",
+		"build:ui": "rm -rf dist && cd ../../part5/bloglist-frontend && npm run build && cp -r dist ../../part4/blog_list_backend",
+		"deploy": "fly deploy",
+		"deploy:full": "npm run build:ui && npm run deploy",
+		"logs:prod": "fly logs",
+		"lint": "eslint ."
+	},
+	"author": "wei bin",
+	"description": "",
+	"license": "MIT",
+	"dependencies": {
+		"bcrypt": "^5.1.1",
+		"cors": "^2.8.5",
+		"dotenv": "^16.4.5",
+		"express": "^4.19.2",
+		"express-async-errors": "^3.1.1",
+		"jsonwebtoken": "^9.0.2",
+		"mongoose": "^8.5.2"
+	},
+	"devDependencies": {
+		"@eslint/js": "^9.9.0",
+		"@flydotio/dockerfile": "^0.5.8",
+		"@stylistic/eslint-plugin-js": "^2.6.2",
+		"cross-env": "^7.0.3",
+		"eslint": "^8.57.0",
+		"eslint-config-airbnb": "^19.0.4",
+		"eslint-plugin-import": "^2.29.1",
+		"eslint-plugin-jsx-a11y": "^6.9.0",
+		"eslint-plugin-react": "^7.35.0",
+		"eslint-plugin-react-hooks": "^4.6.2",
+		"globals": "^15.9.0",
+		"nodemon": "^3.1.4",
+		"supertest": "^7.0.0"
+	}
+}
