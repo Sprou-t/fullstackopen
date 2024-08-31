@@ -14,11 +14,13 @@ const getAll = async() => {
 }
 
 const create = async (newObject) => {
+  // config obj used to set headers for HTTP req made w axios
+  // the obj can include various settings, such as headers, auth credentials etc
   const config = {
     headers: { Authorization: token },
   }
   const response = await axios.post(baseUrl, newObject, config)
-  return response.data
+  return response.data // return the data sent from back server ie. newly created note
 }
 
 const update = async(id, newObject) =>{
@@ -26,4 +28,15 @@ const update = async(id, newObject) =>{
 	return response.data
 }
 
-export default { getAll, create, setToken,update }
+const remove = async(id) =>{
+  const config = {
+    headers: { Authorization: token },
+  }
+
+  const response = await axios.delete(`${baseUrl}/${id}`, config);
+  return response.data; 
+  // return response data from backend. ie. backend sends back status code 204
+  // useful for testing
+}
+
+export default { getAll, create, setToken,update,remove }

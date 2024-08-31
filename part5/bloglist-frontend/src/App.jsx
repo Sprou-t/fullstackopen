@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import Blog from './components/Blog'
 import blogService from './services/blogs'
 import loginService from './services/login'
@@ -9,6 +9,7 @@ import Togglable from './components/Togglable'
 
 const App = () => {
   const [blogs, setBlogs] = useState([])
+  const [sortedBlogs, setSortedBlogs] = useState([]); // Use state to manage sorted blogs
   const [username, setUsername] = useState('') 
   const [password, setPassword] = useState('')
   // create a state that handles user returned from backend aft logging in w username & password 
@@ -20,14 +21,22 @@ const App = () => {
   const [successMessage, setSuccessMessage] = useState(null);
   const [loginVisible, setLoginVisible] = useState(false)
 
+  const blogFormRef = useRef()
   // this hook runs when webpage renders and fetches all the blogs from backend server using getAll
   // the blogs state then contains all the blogs
+ 
   useEffect(() => {
     blogService.getAll().then(blogs => {
       // console.log(blogs); // Debugging
       setBlogs(blogs);
     });
   }, []);
+
+   // Update sortedBlogs whenever blogs state changes
+   useEffect(() => {
+    const sorted = [...blogs].sort((a, b) => b.likes - a.likes);
+    setSortedBlogs(sorted);
+  }, [blogs]);
 
   // this effect hook keeps user logs in. aft login, user info stored in local storage, then
   // everytime page refresh, instead fo losing the info, this effect hook activates and re-stores
@@ -67,7 +76,8 @@ const App = () => {
 
   // this function activates when user submits the form in blogForm
   const addBlog = async (event)=> {
-    event.preventDefault()
+    event.preventDefault() // prevent page reload
+    blogFormRef.current.toggleVisibility()
     // use states to create the new blog
     const blogObject = {
       title: blogTitle,
@@ -102,6 +112,30 @@ const App = () => {
       }
     }
   };
+
+  const deleteBlog = async(id) =>{
+    const blogToDelete = blogs.find(blog => blog.id === id);
+    if (blogToDelete) {
+      try{
+        // send a delete req to backend
+        await blogService.remove(id);
+  
+        // update local state to remove deleted blog(note that filter creates a copy of blogs)
+        setBlogs(blogs.filter(blog => blog.id !== id));
+        setSuccessMessage(`Blog '${blogToDelete.title}' deleted successfully!`);
+      setTimeout(() => {
+        setSuccessMessage(null);
+      }, 5000);
+      }catch(error){
+        console.error('Error deleting blog:', error);
+      setErrorMessage('Failed to delete the blog');
+      setTimeout(() => {
+        setErrorMessage(null);
+      }, 5000);
+    }
+      }
+    }
+  
 
   const handleLogout = () => {
     window.localStorage.removeItem('loggedBlogAppUser')
@@ -183,6 +217,7 @@ const App = () => {
   )     
 // note that both notif will only show if there's a msg given in error/successMessage
 // note that we need to pass key to render list  
+// note taht toggalble buttonlabel is the words taht we put on the toogglable button
 return (
     <div>
       <h2>blogs</h2>
@@ -194,7 +229,7 @@ return (
         <div>
           <p>{user.name} logged in</p>
           <button onClick={handleLogout}>logout</button>
-          <Togglable buttonLabel="new blog">
+          <Togglable buttonLabel="new blog" ref = {blogFormRef}>
             <BlogForm
               onSubmit={addBlog}
               title={blogTitle}
@@ -208,7 +243,7 @@ return (
 
           <Togglable buttonLabel="show blog">
             <ul>
-              {blogs.map(blog => 
+              {sortedBlogs.map(blog => 
                 <Blog
                   key={blog.id}
                   blogId = {blog.id}
@@ -216,6 +251,8 @@ return (
                   blogUrl={blog.url}
                   blogLikes= {blog.likes}
                   updateBlogLikes = {updateBlogLikes}
+                  username = {user.name}
+                  deleteBlog = {deleteBlog}
                 />
               )}
             </ul>

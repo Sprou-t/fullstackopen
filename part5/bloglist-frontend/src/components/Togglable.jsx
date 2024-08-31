@@ -1,6 +1,6 @@
-import { useState } from 'react'
+import { useState, forwardRef, useImperativeHandle } from 'react'
 
-const Togglable = (props) => {
+const Togglable = forwardRef((props,refs) => {
   const [visible, setVisible] = useState(false)
 
   const hideWhenVisible = { display: visible ? 'none' : '' }
@@ -9,6 +9,12 @@ const Togglable = (props) => {
   const toggleVisibility = () => {
     setVisible(!visible)
   }
+
+  useImperativeHandle(refs, () => {
+    return {
+      toggleVisibility
+    }
+  })
 // in App.jsx, depending on wat is being put in <Togglable>, the component
 // willbe the props.children or the child component eg.
 //<Togglable buttonLabel='login'> 
@@ -32,6 +38,6 @@ const Togglable = (props) => {
       </div>
     </div>
   )
-}
+})
 
 export default Togglable

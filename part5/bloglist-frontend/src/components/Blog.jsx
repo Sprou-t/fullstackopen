@@ -1,4 +1,4 @@
-const Blog = ({ blogId, blogTitle, blogUrl, blogLikes, updateBlogLikes }) => {
+const Blog = ({ blogId, blogTitle, blogUrl, blogLikes, updateBlogLikes, username, deleteBlog }) => {
   const blogStyle = {
     paddingTop: 10,
     paddingLeft: 2,
@@ -12,8 +12,11 @@ const Blog = ({ blogId, blogTitle, blogUrl, blogLikes, updateBlogLikes }) => {
   return (
     <div style={blogStyle}>
       <div>
-        {blogTitle} {blogUrl} 
-        {blogLikes} <button onClick={() => updateBlogLikes(blogId)} >like</button>
+        <p>{blogTitle}</p> 
+        <p>{blogUrl} </p>
+        <p>{blogLikes} <button onClick={() => updateBlogLikes(blogId)} >like</button> </p>
+        <p>{username}</p>
+        <button onClick={()=> deleteBlog(blogId)}>remove</button>
       </div>
   </div>  
 )
