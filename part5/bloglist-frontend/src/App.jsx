@@ -14,17 +14,14 @@ const App = () => {
   const [password, setPassword] = useState('')
   // create a state that handles user returned from backend aft logging in w username & password 
   const [user, setUser] = useState(null) 
-  const [blogTitle, setBlogTitle] = useState('')
-  const [blogUrl, setBlogUrl] = useState('')
-  const [blogLikes, setBlogLikes] = useState('')
   const [errorMessage, setErrorMessage] = useState(null); // put null so that when no msg, the Notification component wont render
   const [successMessage, setSuccessMessage] = useState(null);
   const [loginVisible, setLoginVisible] = useState(false)
 
   const blogFormRef = useRef()
+
   // this hook runs when webpage renders and fetches all the blogs from backend server using getAll
   // the blogs state then contains all the blogs
- 
   useEffect(() => {
     blogService.getAll().then(blogs => {
       // console.log(blogs); // Debugging
@@ -74,27 +71,13 @@ const App = () => {
     }
   }
 
-  // this function activates when user submits the form in blogForm
-  const addBlog = async (event)=> {
-    event.preventDefault() // prevent page reload
-    blogFormRef.current.toggleVisibility()
-    // use states to create the new blog
-    const blogObject = {
-      title: blogTitle,
-      url: blogUrl,
-      likes:  blogLikes,
-    }
-    const createdBlog = await blogService.create(blogObject);
-    setBlogs(blogs.concat(createdBlog))
-    // clear the i/p field cuz the fields r assigned blogTitle, blogAuthor and blogLikes
-    setBlogTitle('');
-    setBlogUrl('')
-    setBlogLikes('')
-    setSuccessMessage(`A new blog '${blogObject.title}' added!`);
-        setTimeout(() => {
-        setSuccessMessage(null);
-    }, 5000);
-  }
+  const addBlog = async (blogData) => {
+    blogFormRef.current.toggleVisibility();
+    const createdBlog = await blogService.create(blogData);
+    setBlogs(blogs.concat(createdBlog));
+    setSuccessMessage(`A new blog '${blogData.title}' added!`);
+    setTimeout(() => setSuccessMessage(null), 5000);
+  };
   // id will receive blogID as arg
   const updateBlogLikes = async (id) => {
     const blogToUpdate = blogs.find(blog => blog.id === id);
@@ -143,17 +126,6 @@ const App = () => {
     blogService.setToken(null) // clear the token
   }
 
-  const handleBlogTitleChange = (event) => {
-    setBlogTitle(event.target.value)
-  }
-
-  const handleBlogUrlChange = (event) => {
-    setBlogUrl(event.target.value)
-  }
-
-  const handleBlogLikesChange = (event) => {
-    setBlogLikes(event.target.value)
-  }
   // this function serves as a reusable piece of logic that defines how login
   // form shd be displaced based on the conditional. it uses LoginForm
   // from components to render the JSX
@@ -232,12 +204,6 @@ return (
           <Togglable buttonLabel="new blog" ref = {blogFormRef}>
             <BlogForm
               onSubmit={addBlog}
-              title={blogTitle}
-              url={blogUrl}
-              likes={blogLikes}
-              handleTitleChange={handleBlogTitleChange}
-              handleUrlChange={handleBlogUrlChange} // Ensure this is defined in your component
-              handleLikesChange={handleBlogLikesChange}
             />
           </Togglable>
 
