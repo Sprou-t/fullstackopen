@@ -94,7 +94,7 @@ blogRouter.put("/:id", async (request, response) => {
 	console.log("Updated Blog to Send:", updatedBlog);
 	// don't need end when we are sending data over such as put and post as .json auto ends the response aft sending
 	// response.json(updatedBlog).status(205).end(); is wrong, need to set status code first if not default 200 will apply
-	response.status(205).json(updatedBlog);
+	response.status(200).json(updatedBlog);
 });
 
 module.exports = blogRouter;
